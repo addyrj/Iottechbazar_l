@@ -1,0 +1,64 @@
+const generateOrder = async (req, res, next) => {
+    try {
+        const { amount } = req.body;
+        const user = req.user;
+        if (isEmpty(amount)) {
+            res.status(300).send({
+                status: 300,
+                message: "Failed! Amount is not found"
+            })
+        } else if (!user) {
+            res.status(300).send({
+                status: 300,
+                message: "Failed! You have not authorized"
+            })
+        } else {
+            let instance = new Razorpay({
+                key_id: process.env.RAZOR_PAY_KEY_ID,
+                key_secret: process.env.RAZOR_PAY_KEY_SECRET,
+            });
+            const orderCount = await Order.findAll();
+            const settingInfo = await Setting.findAll();
+            const option = {
+                amount: parseInt(amount) * 100,
+                currency: "INR",
+                receipt: `recipt#${orderCount.length + 1}`,
+                payment_capture: 1,
+                partial_payment: false,
+                notes: {
+                    key_id: process.env.RAZOR_PAY_KEY_ID,
+                    key_secret: process.env.RAZOR_PAY_KEY_SECRET,
+                    name: settingInfo[0].app_name,
+                    description: "Online Transaction from IoTtech Smart Product",
+                    image: settingInfo[0].app_logo,
+                    address: settingInfo[0].app_address,
+                    themeColor: "#a6c76c",
+                    userName: user.name,
+                    userEmail: user.email,
+                    userContact: user.contact
+                }
+            }
+
+            const generateNewOrder = await instance.orders.create(option);
+            if (generateNewOrder) {
+                return res.status(200).send({
+                    status: 200,
+                    message: "Order generate successfull",
+                    info: generateNewOrder
+                })
+            } else {
+                return res.status(300).send({
+                    status: 300,
+                    message: "Failed! Order generate not created",
+                })
+            }
+        }
+
+    } catch (error) {
+        return res.status(500).json({
+            status: 500,
+            error: true,
+            message: error.message || error
+        })
+    }
+}
