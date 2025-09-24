@@ -1,11 +1,15 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { getAdminBlogs, getTestApiData } from "../../../../Database/Action/AdminAction";
+import { getAdminBlogs, setLoder } from "../../../../Database/Action/AdminAction";
 import styled from "styled-components";
 import { userListDatatables } from "../../Javascript/Datatbales.Main";
 import "../../Javascript/datatable.css"
 import { NavLink } from "react-router-dom"
 import moment from "moment"
+import { postHeaderWithToken } from "../../../../Database/Utils";
+import toast from "react-hot-toast";
+import axios from "axios";
+
 const HtmlToReactParser = require("html-to-react").Parser;
 
 const AdminBlogs = () => {
@@ -24,6 +28,45 @@ const AdminBlogs = () => {
     const htmlToReactParser = new HtmlToReactParser();
     const reactElement = htmlToReactParser.parse(html);
     return reactElement;
+  };
+
+  // Delete Blog Function using direct axios
+  const handleDeleteBlog = (id) => {
+    if (!window.confirm("Are you sure you want to delete this blog?")) return;
+
+    if (!id) {
+      toast.error("Failed! Blog id is empty");
+      return;
+    }
+
+    let formData = new FormData();
+    formData.append("id", id);
+
+    dispatch(setLoder(true));
+    
+    axios
+      .post(
+        process.env.REACT_APP_BASE_URL + "deleteBlog",
+        formData,
+        postHeaderWithToken
+      )
+      .then((response) => {
+        dispatch(setLoder(false));
+        console.log("Delete response:", response.data);
+        
+        if (response.data.status === 200) {
+          toast.success(response?.data?.message);
+          // Refresh the blog list
+          dispatch(getAdminBlogs());
+        } else {
+          toast.error(response?.data?.message);
+        }
+      })
+      .catch((error) => {
+        dispatch(setLoder(false));
+        console.log("Delete blog error:", error);
+        toast.error(error?.response?.data?.message || "Something went wrong while deleting the blog.");
+      });
   };
 
   useEffect(() => {
@@ -72,12 +115,18 @@ const AdminBlogs = () => {
                         <tr key={index}>
                           <td className="table-text-style">{currElem.title}</td>
                           <td className="table-text-style">{getHtmlText(currElem.description)}</td>
-                          <td className="table-text-style text-center"><img className="imageStyle" src={process.env.REACT_APP_IMAGE_URL + currElem.avatar} /></td>
+                          <td className="table-text-style text-center">
+                            <img 
+                              className="imageStyle" 
+                              src={process.env.REACT_APP_IMAGE_URL + currElem.avatar} 
+                              alt={currElem.title}
+                            />
+                          </td>
                           <td className="table-text-style">
                             <select className="form-control select2" style={{ width: "100%" }} defaultValue={currElem.status}>
-                              {statusList.map((item) => {
+                              {statusList.map((item, itemIndex) => {
                                 return (
-                                  <option key={index} value={item}>{item}</option>
+                                  <option key={itemIndex} value={item}>{item}</option>
                                 )
                               })}
                             </select>
@@ -85,8 +134,20 @@ const AdminBlogs = () => {
                           <td className="table-text-style text-center">{currElem.createdBy}</td>
                           <td className="table-text-style">{getTime(currElem.createdAt)}</td>
                           <td className="table-text-style text-center">
-                            <a href="#" className="table-text-style cursor-pointer"> <i className="fa fa-edit mr-2" /></a>
-                            <a className="table-text-style cursor-pointer" href="#"> <i className="fa fa-trash" /></a>
+                            <NavLink 
+                              to={"/admin_add_blogs"} 
+                              state={{ blogData: currElem }}
+                              className="table-text-style cursor-pointer"
+                            > 
+                              <i className="fa fa-edit mr-2" />
+                            </NavLink>
+                            <a 
+                              className="table-text-style cursor-pointer" 
+                              onClick={() => handleDeleteBlog(currElem.id)}
+                              style={{ cursor: "pointer" }}
+                            > 
+                              <i className="fa fa-trash" />
+                            </a>
                           </td>
                         </tr>
                       )
@@ -103,23 +164,27 @@ const AdminBlogs = () => {
 };
 
 const Wrapper = styled.section`
-.parentLayout{
-  filter: blur(8px);
-  -webkit-filter: blur(8px);
-}
-.mainLayout {
-  height: 100vh;
-  overflow-y: auto;
-}
-.table-text-style {
+  .parentLayout{
+    filter: blur(8px);
+    -webkit-filter: blur(8px);
+  }
+  .mainLayout {
+    height: 100vh;
+    overflow-y: auto;
+  }
+  .table-text-style {
     color: black;
     font-size: 1rem;
-    font-family: "Gill Sans", "Gill Sans MT", Calibri, "Trebuchet MS",
-      sans-serif;
+    font-family: "Gill Sans", "Gill Sans MT", Calibri, "Trebuchet MS", sans-serif;
+    text-decoration: none;
   }
   .table-text-style:hover {
     color: #ff6000;
   }
+  .cursor-pointer {
+    cursor: pointer;
+  }
+  
   .page-event{
     width: 75%;
     margin-bottom: 20px;
@@ -132,34 +197,35 @@ const Wrapper = styled.section`
     gap: 20px;
 
     .buttonStyle{
-    width: 200px;
-    height: 2.5rem;
-    background-color: #17a2b8;
-    color: white;
-    border: none;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    font-size: 18px;
-    font-weight: bold;
-    transition: all 0.3s ease;
-    -webkit-transition: all 0.3s ease 0s;
-    -moz-transition: all 0.3s ease 0s;
-    -o-transition: all 0.3s ease 0s;
-    &:hover,
-    &:active {
-      background-color: white;
-      border: #17a2b8 1px solid;
-      color: black;
+      width: 200px;
+      height: 2.5rem;
+      background-color: #17a2b8;
+      color: white;
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       cursor: pointer;
-      transform: scale(0.96);
+      font-size: 18px;
+      font-weight: bold;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      
+      &:hover,
+      &:active {
+        background-color: white;
+        border: #17a2b8 1px solid;
+        color: black;
+        cursor: pointer;
+        transform: scale(0.96);
+      }
     }
   }
-  }
+  
   .imageStyle {
     width: 50px;
     height: 30px;
+    object-fit: cover;
   }
 `;
 

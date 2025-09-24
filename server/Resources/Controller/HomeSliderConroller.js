@@ -112,123 +112,152 @@ const getSlider = async (req, res, next) => {
     }
 }
 
-const updateSlider = async (req, re, next) => {
+const updateSlider = async (req, res, next) => {
     try {
         const { title, type, proSlug, url, status, id } = req.body;
         const admin = req.admin;
-        const errorResponse = await ErrorNullResponse(req.body);
+
+        console.log("Update Slider Request:", { id, title, type, proSlug, status });
+        console.log("File:", req.file);
+
+        // Basic validation
+        if (!admin) {
+            return res.status(300).send({
+                status: 300,
+                message: "Failed! You have not authorized"
+            });
+        }
+
+        if (!id) {
+            return res.status(300).send({
+                status: 300,
+                message: "Failed! Slider ID is required"
+            });
+        }
+
+        const checkSlider = await Slider.findOne({ where: { id: id } });
+        if (!checkSlider) {
+            return res.status(400).send({
+                status: 400,
+                message: "Failed! Slider not found"
+            });
+        }
+
+        if (checkSlider.createdBy !== admin.role && checkSlider.createdBy !== "Admin") {
+            return res.status(300).send({
+                status: 300,
+                message: "Failed! Authorization failed"
+            });
+        }
+
+        // Prepare update data
+        const updateData = {
+            title: title || checkSlider.title,
+            type: type || checkSlider.type,
+            productSlug: proSlug || checkSlider.productSlug,
+            status: status || checkSlider.status
+        };
+
+        // Only update avatar if new file is uploaded
+        if (req.file) {
+            updateData.avatar = req.file.filename;
+            
+            // Delete old image if exists
+            if (checkSlider.avatar) {
+                const imageDir = path.join(__dirname, "..", "..", "files", checkSlider.avatar);
+                if (fs.existsSync(imageDir)) {
+                    fs.unlinkSync(imageDir);
+                }
+            }
+        }
+
+        console.log("Update Data:", updateData);
+
+        // Update the slider
+        const result = await Slider.update(updateData, { 
+            where: { id: id } 
+        });
+
+        console.log("Update Result:", result);
+
+        if (result[0] > 0) {
+            return res.status(200).send({
+                status: 200,
+                message: "Slider updated successfully",
+                info: result
+            });
+        } else {
+            return res.status(300).send({
+                status: 300,
+                message: "Failed! No changes made or slider not found"
+            });
+        }
+
+    } catch (error) {
+        console.error("Update Slider Error:", error);
+        return res.status(500).json({
+            status: 500,
+            error: true,
+            message: error.message || "Internal server error"
+        });
+    }
+};
+
+const deleteSlider = async (req, res) => {
+    try {
+        // Read id from body OR query
+        const id = req.body.id || req.query.id;
+        const admin = req.admin;
+
+        if (!id) {
+            return res.status(300).json({
+                status: 300,
+                message: "Failed! Slider id is empty"
+            });
+        }
 
         if (!admin) {
             return res.status(300).send({
                 status: 300,
                 message: "Failed! You have not authorized"
-            })
-        } else if (errorResponse.length !== 0) {
-            return res.status(300).send({
-                status: 300,
-                message: errorResponse
-            })
-        } else {
-            const checkSlider = await Slider.findOne({ where: { id: id } });
-            if (checkSlider) {
-                if (checkSlider.createdBy === admin.role || checkSlider.createdBy === "Admin") {
-                    const info = {
-                        title: title,
-                        type: type,
-                        productSlug: proSlug,
-                        avatar: req.file !== undefined ? req.file.filename : checkSlider.avatar,
-                        status: status
-                    }
+            });
+        }
 
-                    await Slider.update(info)
-                        .then((result) => {
-                            return res.status(200).send({
-                                status: 200,
-                                message: "Slider Update Successfull",
-                                info: result
-                            })
-                        })
-                        .catch((error) => {
-                            return res.status(300).send({
-                                status: 300,
-                                message: "Failed! Slider not updated",
-                                info: error
-                            })
-                        })
-                } else {
-                    return res.status(300).send({
-                        status: 300,
-                        message: "Failed! Authorization failed"
-                    })
-                }
-            } else {
-                return res.status(400).send({
-                    status: 400,
-                    message: "Failed! Slider is not found"
-                })
+        const checkSlider = await Slider.findOne({ where: { id: id } });
+
+        if (!checkSlider) {
+            return res.status(400).send({
+                status: 400,
+                message: "Failed! Slider is not found"
+            });
+        }
+
+        // Delete image file if exists
+        if (checkSlider.avatar) {
+            const imageDir = path.join(__dirname, "..", "..", "files", checkSlider.avatar);
+            if (fs.existsSync(imageDir)) {
+                fs.unlinkSync(imageDir);
             }
         }
+
+        // Delete slider record
+        await Slider.destroy({ where: { id: id } });
+
+        return res.status(200).send({
+            status: 200,
+            message: "Slider deleted successfully"
+        });
 
     } catch (error) {
         return res.status(500).json({
             status: 500,
             error: true,
             message: error.message || error
-        })
+        });
     }
-}
+};
 
-const deleteSlider = async (req, re, next) => {
-    try {
-        const id = req.body.id;
-        const admin = req.admin;
-        if (isEmpty(id)) {
-            return res.status(300).json({
-                status: 300,
-                message: "Failed! Slider id is empty"
-            })
-        } else if (!admin) {
-            return res.status(300).send({
-                status: 300,
-                message: "Failed! You have not authorized"
-            })
-        } else {
-            const checkSlider = await Slider.findOne({ where: { id: id } });
 
-            if (checkSlider) {
-                const imageDir = path.join(__dirname, "..", "..", "files", imageName);
-                await fs.unlinkSync(imageDir);
-
-                await Slider.destroy({ where: { id: id } })
-                    .then((result) => {
-                        return res.status(200).send({
-                            status: 200,
-                            message: "Slider Delete Successfull",
-                            info: result
-                        })
-                    })
-                    .catch((error) => {
-                        return res.status(300).send({
-                            status: 300,
-                            message: "Failed! Slider not deleted",
-                            info: error
-                        })
-                    })
-            } else {
-                return res.status(400).send({
-                    status: 400,
-                    message: "Failed! Slider is not found"
-                })
-            }
-        }
-    } catch (error) {
-        return res.status(500).json({
-            status: 500,
-            error: true,
-            message: error.message || error
-        })
-    }
-}
 
 const changeSliderStatus = async (req, re, next) => {
     try {

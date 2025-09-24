@@ -156,51 +156,44 @@ const deletePage = async (req, res, next) => {
     try {
         const id = req.body.id;
         const admin = req.admin;
-        if (isEmpty(id)) {
+
+        if (!id) {
             return res.status(300).json({
                 status: 300,
                 message: "Failed! Page id is not found"
-            })
+            });
         } else if (!admin) {
             return res.status(300).json({
                 status: 300,
                 message: "Failed! You have not authorized"
-            })
+            });
+        }
+
+        const checkPage = await LegalPage.findOne({ where: { id: id } });
+
+        if (checkPage && (checkPage.createdBy === admin.role || checkPage.createdBy === "Admin")) {
+            const result = await LegalPage.destroy({ where: { id: id } });
+
+            return res.status(200).json({
+                status: 200,
+                message: "Legal Page deleted Successfully",
+                info: result   // Sequelize returns count of deleted rows
+            });
         } else {
-            const checkPage = await LegalPage.findOne({ where: { id: id } });
-            if (checkPage.createdBy === admin.role || checkPage.createdBy === "Admin") {
-                await LegalPage.destroy({ where: { id: id } }
-                    .then((result) => {
-                        return res.status(200).json({
-                            status: 200,
-                            message: "Legal Page delete Successfully",
-                            info: result
-                        })
-                    })
-                    .catch((error) => {
-                        return res.status(300).json({
-                            status: 300,
-                            message: "Failed! Page is not deleted",
-                            info: error
-                        })
-                    })
-                )
-            } else {
-                return res.status(300).json({
-                    status: 300,
-                    message: "Failed! You have not authorized"
-                })
-            }
+            return res.status(300).json({
+                status: 300,
+                message: "Failed! You have not authorized"
+            });
         }
     } catch (error) {
         return res.status(500).json({
             status: 500,
             error: true,
             message: error.message || error
-        })
+        });
     }
-    next();
-}
+};
+
 
 const changePageStatus = async (req, res, next) => {
     try {

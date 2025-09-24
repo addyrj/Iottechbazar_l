@@ -11,7 +11,7 @@ const { createColor, getColor, updateColor, deleteColor, changeColorStatus, crea
 const { createEnquiry, getAllEnquiry } = require("../Controller/ContactUsController");
 const { createCoupons, getCoupons } = require("../Controller/CouponController");
 const { checkIp, checkDeviceOrigin, testApi, createAdminTrackLog, createUserTrackLog, getTrackLog } = require("../Controller/ExtraDataController");
-const { createSlider, getSlider } = require("../Controller/HomeSliderConroller");
+const { createSlider, getSlider,updateSlider,deleteSlider } = require("../Controller/HomeSliderConroller");
 const { createLanguage, getLanguage } = require("../Controller/LanguageController");
 const { createPage, getPage, updatePage, deletePage, changePageStatus, getPageClient } = require("../Controller/LegalPageController");
 const { addManager, getManager } = require("../Controller/ManagementController");
@@ -361,6 +361,12 @@ router.post("/createSlider", AdminAuth, uploadFiles.single("avatar"), createSlid
 
 // get slider
 router.get("/getHomeSlider", uploadFiles.none(), getSlider)
+
+// update slider
+router.post("/updateSlider", AdminAuth, uploadFiles.single("avatar"), updateSlider);
+
+// delete slider
+router.post("/deleteSlider", AdminAuth, uploadFiles.none(), deleteSlider);
 
 // create coupon
 router.post("/createCoupon", AdminAuth, uploadFiles.single("avatar"), createCoupons)

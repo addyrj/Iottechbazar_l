@@ -50,6 +50,40 @@ const AdminRefrealPages = () => {
     }
   }
 
+    const deleteLegalPage = (id) => {
+    if (!id) {
+      toast.error("Failed! id is empty");
+      return;
+    }
+
+    let formData = new FormData();
+    formData.append("id", id);
+
+    dispatch(setLoder(true));
+    axios
+      .post(
+        process.env.REACT_APP_BASE_URL + "deleteLegalPage",
+        formData,
+        postHeaderWithToken
+      )
+      .then((response) => {
+        dispatch(setLoder(false));
+        if (response.data.status === 200) {
+          toast.success(response?.data?.message);
+          // refresh list
+          dispatch(getAdminLegalPages({ navigate: navigate }));
+        } else {
+          toast.error(response?.data?.message);
+        }
+      })
+      .catch((error) => {
+        dispatch(setLoder(false));
+        console.log("error is ", error);
+        toast.error(error?.response?.data?.message || error.message);
+      });
+  };
+
+
   useEffect(() => {
     dispatch(getAdminLegalPages({ navigate: navigate }))
   }, [dispatch]);
@@ -123,7 +157,13 @@ const AdminRefrealPages = () => {
                                 url: currElem.url,
                                 value: currElem.value
                               }} className="table-text-style cursor-pointer"> <i className="fa fa-edit mr-2" /></NavLink>
-                              <a className="table-text-style cursor-pointer" href="#"> <i className="fa fa-trash" /></a>
+                            <a
+  className="table-text-style cursor-pointer"
+  onClick={() => deleteLegalPage(currElem.id)}
+>
+  <i className="fa fa-trash" />
+</a>
+
                             </td>
                           </tr>
                         );

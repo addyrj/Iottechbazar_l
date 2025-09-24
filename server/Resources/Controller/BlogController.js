@@ -78,7 +78,8 @@ const getBlog = async (req, res, next) => {
                 const slug = item.slug;
                 const checkCat = checkCategory.filter((currElem) => { return currElem.id == item.categoryId })
                 const categoryId = item.categoryId;
-                const categoryName = checkCat[0].name;
+              const categoryName = checkCat.length > 0 ? checkCat[0].name : null; // or "Unknown"
+
                 const title = item.name;
                 const description = item.description;
                 const avatar = item.avatar;
@@ -183,63 +184,108 @@ const updateBlog = async (req, res, next) => {
 
 const deleteBlog = async (req, res, next) => {
     try {
-        const id = req.body.id;
+        const { id } = req.body;
         const admin = req.admin;
 
-        if (isEmpty(id)) {
-            return res.status(300).send({
-                status: 300,
-                message: "Failed! Blog id is empty",
-            });
-        } else if (!admin) {
-            return res.status(300).send({
-                status: 300,
-                message: "Failed! You have not authorized",
-            });
-        } else {
-            const checkBlog = await Blog.findOne({ where: { id: id } });
-            if (checkBlog) {
-                if (checkBlog.createdBy === admin.role || checkBlog.createdBy === "Admin") {
-                    const imageDir = path.join(__dirname, "..", "..", "files", checkBlog.avatar);
-                    await fs.unlinkSync(imageDir);
+        console.log('Delete Blog Request:', { id, admin: admin?.id });
 
-                    await Blog.destroy({ where: { id: id } })
-                        .then((result) => {
-                            return res.status(200).send({
-                                status: 200,
-                                message: "Blog delete Successfull",
-                                info: result
-                            })
-                        })
-                        .catch((error) => {
-                            return res.status(300).send({
-                                status: 300,
-                                message: "Failed! Blog not deleted",
-                                info: error
-                            })
-                        })
+        // Comprehensive ID validation
+        if (id === undefined || id === null || id === "") {
+            return res.status(400).send({
+                status: 400,
+                message: "Failed! Blog id is required",
+            });
+        }
+
+        // Convert to number and validate
+        const numericId = Number(id);
+        if (isNaN(numericId) || numericId <= 0) {
+            return res.status(400).send({
+                status: 400,
+                message: "Failed! Blog id must be a valid positive number",
+            });
+        }
+
+        // Admin authorization check
+        if (!admin) {
+            return res.status(401).send({
+                status: 401,
+                message: "Failed! You are not authorized",
+            });
+        }
+
+        // Check if blog exists
+        const checkBlog = await Blog.findOne({ where: { id: numericId } });
+        
+        if (!checkBlog) {
+            return res.status(404).send({
+                status: 404,
+                message: "Failed! Blog not found",
+            });
+        }
+
+        // Authorization check - user can only delete their own blogs or admin can delete any
+        const isAuthorized = checkBlog.createdBy === admin.role || 
+                           checkBlog.createdBy === "Admin" || 
+                           admin.role === "Admin";
+
+        if (!isAuthorized) {
+            return res.status(403).send({
+                status: 403,
+                message: "Failed! You are not authorized to delete this blog",
+            });
+        }
+
+        // Delete associated image file if it exists
+        if (checkBlog.avatar) {
+            try {
+                const imageDir = path.join(__dirname, "..", "..", "files", checkBlog.avatar);
+                
+                // Check if file exists before deleting
+                if (fs.existsSync(imageDir)) {
+                    await fs.unlink(imageDir);
+                    console.log('Image file deleted:', checkBlog.avatar);
                 } else {
-                    return res.status(300).send({
-                        status: 300,
-                        message: "Authorization Failed"
-                    })
+                    console.log('Image file not found, skipping deletion:', checkBlog.avatar);
                 }
-
-            } else {
-                return res.status(400).json({
-                    status: 400,
-                    message: "Failed! Blog is not found"
-                })
+            } catch (fileError) {
+                console.error('Error deleting image file:', fileError);
+                // Continue with blog deletion even if image deletion fails
             }
         }
+
+        // Delete blog from database
+        const result = await Blog.destroy({ 
+            where: { id: numericId } 
+        });
+
+        if (result) {
+            return res.status(200).send({
+                status: 200,
+                message: "Blog deleted successfully",
+                data: {
+                    deletedBlogId: numericId,
+                    imageDeleted: !!checkBlog.avatar
+                }
+            });
+        } else {
+            return res.status(500).send({
+                status: 500,
+                message: "Failed! Blog deletion failed unexpectedly",
+            });
+        }
+
     } catch (error) {
+        console.error('Delete Blog Error:', error);
+        
         return res.status(500).json({
             status: 500,
             error: true,
-            message: error.message || error
-        })
+            message: "Internal server error",
+            details: process.env.NODE_ENV === 'development' ? error.message : undefined
+        });
     }
-}
+};
 
 const chnageBlogStatus = async (req, res, next) => {
     try {
