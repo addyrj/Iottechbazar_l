@@ -15,9 +15,25 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.STRING,
             allowNull: true,
         },
-        categoryId: {
+        appliesTo: {   // "all", "category", "product"
             type: DataTypes.STRING,
+            allowNull: false,
+            defaultValue: "all",
+        },
+        categoryId: {
+            type: DataTypes.STRING, // store single category id or comma-separated
             allowNull: true,
+        },
+        productIds: {
+            type: DataTypes.TEXT,   // store JSON array of product IDs
+            allowNull: true,
+            get() {
+                const rawValue = this.getDataValue("productIds");
+                return rawValue ? JSON.parse(rawValue) : [];
+            },
+            set(value) {
+                this.setDataValue("productIds", JSON.stringify(value));
+            }
         },
         discountType: {
             type: DataTypes.STRING,

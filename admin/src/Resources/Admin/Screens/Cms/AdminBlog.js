@@ -43,7 +43,7 @@ const AdminBlogs = () => {
     formData.append("id", id);
 
     dispatch(setLoder(true));
-    
+
     axios
       .post(
         process.env.REACT_APP_BASE_URL + "deleteBlog",
@@ -53,7 +53,7 @@ const AdminBlogs = () => {
       .then((response) => {
         dispatch(setLoder(false));
         console.log("Delete response:", response.data);
-        
+
         if (response.data.status === 200) {
           toast.success(response?.data?.message);
           // Refresh the blog list
@@ -116,9 +116,9 @@ const AdminBlogs = () => {
                           <td className="table-text-style">{currElem.title}</td>
                           <td className="table-text-style">{getHtmlText(currElem.description)}</td>
                           <td className="table-text-style text-center">
-                            <img 
-                              className="imageStyle" 
-                              src={process.env.REACT_APP_IMAGE_URL + currElem.avatar} 
+                            <img
+                              className="imageStyle"
+                              src={process.env.REACT_APP_IMAGE_URL + currElem.avatar}
                               alt={currElem.title}
                             />
                           </td>
@@ -134,18 +134,19 @@ const AdminBlogs = () => {
                           <td className="table-text-style text-center">{currElem.createdBy}</td>
                           <td className="table-text-style">{getTime(currElem.createdAt)}</td>
                           <td className="table-text-style text-center">
-                            <NavLink 
-                              to={"/admin_add_blogs"} 
-                              state={{ blogData: currElem }}
+
+                            <NavLink
+                              to={"/admin_add_blogs"}
+                              state={{ blogData: currElem }} 
                               className="table-text-style cursor-pointer"
-                            > 
+                            >
                               <i className="fa fa-edit mr-2" />
                             </NavLink>
-                            <a 
-                              className="table-text-style cursor-pointer" 
+                            <a
+                              className="table-text-style cursor-pointer"
                               onClick={() => handleDeleteBlog(currElem.id)}
                               style={{ cursor: "pointer" }}
-                            > 
+                            >
                               <i className="fa fa-trash" />
                             </a>
                           </td>

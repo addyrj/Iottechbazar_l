@@ -117,59 +117,78 @@ const updateBlog = async (req, res, next) => {
     try {
         const { name, description, id } = req.body;
         const admin = req.admin;
-        const errorResponse = ErrorNullResponse(req.body);
+        
+        // Fixed: Added await for ErrorNullResponse
+        const errorResponse = await ErrorNullResponse(req.body);
+        
         if (!admin) {
-            return res.status(300).json({
-                status: 300,
-                message: errorMessage,
+            return res.status(401).json({
+                status: 401,
+                message: "Failed! You are not authorized",
             });
         } else if (errorResponse.length !== 0) {
-            return res.status(300).send({
-                status: 300,
-                message: "Failed! You have not authorized",
+            return res.status(400).json({
+                status: 400,
+                message: errorResponse,
             });
         } else {
             const checkBlog = await Blog.findOne({ where: { id: id } });
             if (checkBlog) {
-                if (checkBlog.createdBy === admin.role || checkBlog.createdBy === "Admin") {
+                // Fixed authorization logic
+                const isAuthorized = checkBlog.createdBy === admin.role || 
+                                   admin.role === "Admin";
+                
+                if (isAuthorized) {
                     const info = {
                         name: name,
                         description: description,
-                        avatar: req.file !== undefined ? req.file.filename : checkBlog.avatar,
                         status: "true"
                     }
 
-                    if (req.file !== undefined || !isEmpty(req.file.filename)) {
-                        const imageDir = path.join(__dirname, "..", "..", "files", checkBlog.avatar);
-                        await fs.unlinkSync(imageDir);
+                    // Handle file upload if present
+                    if (req.file !== undefined && req.file.filename) {
+                        info.avatar = req.file.filename;
+                        
+                        // Delete old image if new one is uploaded
+                        if (checkBlog.avatar) {
+                            try {
+                                const imageDir = path.join(__dirname, "..", "..", "files", checkBlog.avatar);
+                                if (fs.existsSync(imageDir)) {
+                                    await fs.unlinkSync(imageDir);
+                                }
+                            } catch (fileError) {
+                                console.error('Error deleting old image:', fileError);
+                                // Continue with update even if image deletion fails
+                            }
+                        }
                     }
 
                     await Blog.update(info, { where: { id: id } })
                         .then((result) => {
                             return res.status(200).send({
                                 status: 200,
-                                message: "Blog Update Successfull",
+                                message: "Blog Update Successful",
                                 info: result
                             })
                         })
                         .catch((error) => {
-                            return res.status(300).send({
-                                status: 300,
+                            return res.status(500).send({
+                                status: 500,
                                 message: "Failed! Blog not updated",
-                                info: error
+                                info: error.message
                             })
                         })
 
                 } else {
-                    return res.status(400).json({
-                        status: 400,
-                        message: "Failed!Authorization Failed"
+                    return res.status(403).json({
+                        status: 403,
+                        message: "Failed! Authorization Failed"
                     })
                 }
             } else {
-                return res.status(400).json({
-                    status: 400,
-                    message: "Failed! Blog is not found"
+                return res.status(404).json({
+                    status: 404,
+                    message: "Failed! Blog not found"
                 })
             }
         }
@@ -177,7 +196,7 @@ const updateBlog = async (req, res, next) => {
         return res.status(500).json({
             status: 500,
             error: true,
-            message: error.message || error
+            message: error.message
         })
     }
 }
