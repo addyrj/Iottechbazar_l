@@ -174,14 +174,14 @@ export const proCatHeaderTab = [
     },
     {
         id: 3,
-        title: "Coming Soon"
+        title: "Comming Soon"
     }
 ]
 
 export const proSecTab = [
     {
         id: 1,
-        title: "School Science Project"
+        title: "Scgool Science Projects"
     },
     {
         id: 2,

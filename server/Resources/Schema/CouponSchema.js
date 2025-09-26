@@ -15,25 +15,20 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.STRING,
             allowNull: true,
         },
-        appliesTo: {   // "all", "category", "product"
-            type: DataTypes.STRING,
-            allowNull: false,
-            defaultValue: "all",
-        },
         categoryId: {
-            type: DataTypes.STRING, // store single category id or comma-separated
+            type: DataTypes.STRING,
             allowNull: true,
         },
+        // NEW: Store specific product IDs
         productIds: {
-            type: DataTypes.TEXT,   // store JSON array of product IDs
+            type: DataTypes.TEXT, // Store as JSON string
             allowNull: true,
-            get() {
-                const rawValue = this.getDataValue("productIds");
-                return rawValue ? JSON.parse(rawValue) : [];
-            },
-            set(value) {
-                this.setDataValue("productIds", JSON.stringify(value));
-            }
+        },
+        // NEW: Define scope type
+        scopeType: {
+            type: DataTypes.ENUM('all_products', 'specific_products'),
+            defaultValue: 'all_products',
+            allowNull: false,
         },
         discountType: {
             type: DataTypes.STRING,

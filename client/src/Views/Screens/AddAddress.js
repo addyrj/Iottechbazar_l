@@ -172,7 +172,7 @@ const AddAddress = () => {
                                     <input type="text" name='address1' className="form-control" value={addressInfo.address1} onChange={hnadleInputChange} />
                                 </div>
                             </div>
-                            <label>Landmark & Area Name</label>
+                            <label>Address2</label>
                             <input type="text" name="address2" className="form-control" value={addressInfo.address2} onChange={hnadleInputChange} />
 
                             <div className="row">
