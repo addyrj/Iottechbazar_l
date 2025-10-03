@@ -31,7 +31,30 @@ const Checkout = () => {
     onlinePay: "0"
   });
 
-  console.log("pay state is     ", payState)
+  const [selectedAddress, setSelectedAddress] = useState(null);
+
+  const handleAddressSelect = (address) => {
+    // If clicking the already selected address, deselect it
+    if (selectedAddress?.id === address.id) {
+      setSelectedAddress(null);
+    } else {
+      setSelectedAddress(address);
+    }
+  };
+
+  // Auto-select default address on component load
+useEffect(() => {
+  if (addressList.length > 0 && !selectedAddress) {
+    const defaultAddress = addressList.find(addr => addr.defautAddress === "true");
+    if (defaultAddress) {
+      setSelectedAddress(defaultAddress);
+    } else {
+      // if no default address, select the first one
+      setSelectedAddress(addressList[0]);
+    }
+  }
+}, [addressList, selectedAddress]);
+
 
   const getTotalSellPrice = () => {
     let priceArray = [];
@@ -51,7 +74,6 @@ const Checkout = () => {
 
   const getTotalBasePrice = () => {
     let basePrice = [];
-
     basePrice = userCart.map((currELem) => {
       return currELem.basePrice
     });
@@ -60,7 +82,6 @@ const Checkout = () => {
       const totalBasePrice = basePrice.reduce((a, b) => {
         return a + b;
       })
-
       return totalBasePrice;
     } else {
       return 0;
@@ -94,7 +115,6 @@ const Checkout = () => {
     }
   }
 
-
   const getAddressType = (addType) => {
     if (addType === 0) {
       return "Home";
@@ -106,6 +126,12 @@ const Checkout = () => {
   }
 
   const generateOrder = async () => {
+    // Check if address is selected
+    if (!selectedAddress) {
+      toast.error("Please select an address to continue");
+      return;
+    }
+
     let priceArray = [];
     let totalPrice = "";
     let paymentMode = "";
@@ -131,7 +157,15 @@ const Checkout = () => {
       toast.error("Failed! Amount is not valid")
     } else {
       dispatch(setLoader(true));
-      axios.post(process.env.REACT_APP_BASE_URL + "generateOrder", { amount: totalPrice, paymentMode: paymentMode }, postHeaderWithToken)
+      
+      // Send selected address ID to backend
+      const requestData = {
+        amount: totalPrice, 
+        paymentMode: paymentMode,
+        selectedAddressId: selectedAddress?.id // Add selected address ID
+      };
+
+      axios.post(process.env.REACT_APP_BASE_URL + "generateOrder", requestData, postHeaderWithToken)
         .then((res) => {
           if (res.data.status === 200) {
             dispatch(setLoader(false));
@@ -142,7 +176,6 @@ const Checkout = () => {
               navigate("/");
               window.location.reload(false)
               toast.success(res.data.message);
-
             }
           }
         })
@@ -178,7 +211,6 @@ const Checkout = () => {
         dispatch(setLoader(false));
         toast.error(error?.response?.data?.message || error.message)
       })
-
   }
 
   const startPayment = useCallback((data) => {
@@ -217,9 +249,7 @@ const Checkout = () => {
       toast.error(response.error.metadata.payment_id);
     });
     rzpay.open();
-
   }, [Razorpay])
-
 
   useEffect(() => {
     if (addressList.length === 0) {
@@ -242,9 +272,7 @@ const Checkout = () => {
               <span>Checkout</span>
             </h1>
           </div>
-          {/* End .container */}
         </div>
-        {/* End .page-header */}
         <nav aria-label="breadcrumb" className="breadcrumb-nav">
           <div className="container">
             <ol className="breadcrumb">
@@ -259,9 +287,7 @@ const Checkout = () => {
               </li>
             </ol>
           </div>
-          {/* End .container */}
         </nav>
-        {/* End .breadcrumb-nav */}
         <div className="page-content">
           <>
             <div className="container">
@@ -311,7 +337,6 @@ const Checkout = () => {
               </ul>
             </div>
             <div className="mb-5"></div>
-            {/* End .container */}
             <div className="">
               <div className="container-fluid" style={{ overflowX: "hidden" }}>
                 <div className="tab-content tab-content-carousel">
@@ -333,11 +358,16 @@ const Checkout = () => {
                         :
                         addressList?.map((item, index) => {
                           return (
-                            <div className="col-lg-4">
+                            <div className="col-lg-4" key={index}>
                               <div className="card card-dashboard">
                                 <div className="card-body">
-                                  <input type="checkbox" className='float-right mb-2' checked={item.defautAddress === "true" ? true : false} />
-                                  {/* End .card-title */}
+                                <input 
+  type="checkbox" 
+  className='float-right mb-2' 
+  checked={selectedAddress?.id === item.id} 
+  onChange={() => handleAddressSelect(item)}
+/>
+
                                   <p>
                                     Name : <strong className='userSuffix'>{item.name}</strong>
                                     <br />
@@ -362,9 +392,7 @@ const Checkout = () => {
                                     </div>
                                   </p>
                                 </div>
-                                {/* End .card-body */}
                               </div>
-                              {/* End .card-dashboard */}
                             </div>
                           )
                         })
@@ -376,7 +404,6 @@ const Checkout = () => {
                     </NavLink>
 
                   </div>
-                  {/* .End .tab-pane */}
                   <div
                     className={stateNav.fProducts === "1" ? "tab-pane p-0 fade show active" : "tab-pane p-0 fade"}
                     id="products-top-tab"
@@ -401,9 +428,9 @@ const Checkout = () => {
                       <tbody>
                         {userCart?.map((item, index) => {
                           return (
-                            <tr>
+                            <tr key={index}>
                               <td className='text-center pl-2 table-text-style'>{index + 1}</td>
-                              <td className='text-left pl-2 table-text-style'>Tiger Nixon</td>
+                              <td className='text-left pl-2 table-text-style'>{item.cartProductName}</td>
                               <td className='mobileHandling text-center'>
                                 <img
                                   src={process.env.REACT_APP_IMAGE_URL + item.cartImage}
@@ -426,7 +453,6 @@ const Checkout = () => {
                           <td className='mobileHandling' />
                           <td className='text-center table-text-style'>₹{getTotalBasePrice()}</td>
                         </tr>
-
                         <tr>
                           <td />
                           <td />
@@ -435,7 +461,6 @@ const Checkout = () => {
                           <td className='mobileHandling' />
                           <td className='text-center table-text-style'>₹{"200"}</td>
                         </tr>
-
                         <tr>
                           <td />
                           <td />
@@ -444,7 +469,6 @@ const Checkout = () => {
                           <td className='mobileHandling' />
                           <td className='text-center table-text-style'>₹{getGstTax()}</td>
                         </tr>
-
                         <tr>
                           <td />
                           <td />
@@ -455,9 +479,7 @@ const Checkout = () => {
                         </tr>
                       </tbody>
                     </table>
-
                   </div>
-
                   <div
                     className={stateNav.payOption === "1" ? "tab-pane p-0 fade show active" : "tab-pane p-0 fade"}
                     id="products-sale-tab"
@@ -475,16 +497,13 @@ const Checkout = () => {
                               },
                               '& .MuiSvgIcon-root': { fontSize: 25 }
                             }}
-                            onClick={() => payState === "1" ? setPayState({ ...payState, cod: "0" }) : setPayState({ ...payState, cod: "1", onlinePay: "0" })}
+                            onClick={() => payState.cod === "1" ? setPayState({ ...payState, cod: "0" }) : setPayState({ ...payState, cod: "1", onlinePay: "0" })}
                           />
                           <p className='text-style'
-                            onClick={() => payState === "1" ? setPayState({ ...payState, cod: "0" }) : setPayState({ ...payState, cod: "1", onlinePay: "0" })}
-
+                            onClick={() => payState.cod === "1" ? setPayState({ ...payState, cod: "0" }) : setPayState({ ...payState, cod: "1", onlinePay: "0" })}
                           >Order proceed with cash on delivery (COD)</p>
                         </div>
-
                         <div className="mb-3"></div>
-
                         <div className="online-checkbox">
                           <Checkbox
                             checked={payState.onlinePay === "1" ? true : false}
@@ -495,15 +514,12 @@ const Checkout = () => {
                               },
                               '& .MuiSvgIcon-root': { fontSize: 25 }
                             }}
-                            onClick={() => payState === "1" ? setPayState({ ...payState, onlinePay: "0" }) : setPayState({ ...payState, onlinePay: "1", cod: "0" })}
-
+                            onClick={() => payState.onlinePay === "1" ? setPayState({ ...payState, onlinePay: "0" }) : setPayState({ ...payState, onlinePay: "1", cod: "0" })}
                           />
                           <p className='text-style'
-                            onClick={() => payState === "1" ? setPayState({ ...payState, onlinePay: "0" }) : setPayState({ ...payState, onlinePay: "1", cod: "0" })}
-
+                            onClick={() => payState.onlinePay === "1" ? setPayState({ ...payState, onlinePay: "0" }) : setPayState({ ...payState, onlinePay: "1", cod: "0" })}
                           >Order proceed with online payment</p>
                         </div>
-
                         <button type='button' className="btn btn-outline-primary-2 mt-5 float-right" onClick={() => generateOrder()}>
                           <span style={{ fontSize: "18px", fontWeight: "bold" }}>Proceed To Checkout</span>
                           <i className="icon-long-arrow-right" />
@@ -511,15 +527,11 @@ const Checkout = () => {
                       </div>
                     </div>
                   </div>
-                  {/* .End .tab-pane */}
                 </div>
-                {/* End .tab-content */}
               </div>
             </div>
           </>
-          {/* End .cart */}
         </div>
-        {/* End .page-content */}
       </main>
     </Wrapper>
   )
@@ -591,7 +603,6 @@ const Wrapper = styled.section`
   .card-body{
     overflow: hidden;
   }
-  
 `;
 
 export default Checkout

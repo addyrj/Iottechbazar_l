@@ -16,7 +16,7 @@ const OrderDetail = db.orderDetail;
 
 const generateOrder = async (req, res, next) => {
     try {
-        const { amount, paymentMode } = req.body;
+        const { amount, paymentMode, selectedAddressId } = req.body; // Add selectedAddressId
         const user = req.user;
         if (isEmpty(amount)) {
             res.status(300).send({
@@ -29,13 +29,38 @@ const generateOrder = async (req, res, next) => {
                 message: "Failed! You have not authorized"
             })
         } else {
+            // Check if user has any address at all
+            const checkAnyAddress = await Address.findOne({ where: { userId: user.userId } });
+            if (!checkAnyAddress) {
+                return res.status(400).json({
+                    status: 400,
+                    message: "Failed! Address is not found"
+                })
+            }
+
             let instance = new Razorpay({
                 key_id: process.env.RAZOR_PAY_KEY_ID,
                 key_secret: process.env.RAZOR_PAY_KEY_SECRET,
             });
 
-            const checkAddress = await Address.findOne({ where: { userId: user.userId, defautAddress: "true" } });
-            console.log
+            // Check for selected address OR default address
+            let checkAddress;
+            if (selectedAddressId) {
+                checkAddress = await Address.findOne({ 
+                    where: { 
+                        userId: user.userId, 
+                        id: selectedAddressId 
+                    } 
+                });
+            } else {
+                checkAddress = await Address.findOne({ 
+                    where: { 
+                        userId: user.userId, 
+                        defautAddress: "true" 
+                    } 
+                });
+            }
+
             if (checkAddress) {
                 const checkCart = await Cart.findAll({ where: { userSlug: user.slug } });
                 const checkProduct = await Product.findAll();
@@ -43,10 +68,8 @@ const generateOrder = async (req, res, next) => {
                     const orderCount = await Order.findAll();
                     const settingInfo = await Setting.findAll();
 
-
                     const totalBasePrice = await getTotalBasePrice(checkCart, checkProduct);
                     const totalTaxes = await getGstTax(checkCart, checkProduct);
-
                     const totalAmount = await getTotalSellPrice(checkCart, checkProduct);
 
                     const option = {
@@ -118,7 +141,6 @@ const generateOrder = async (req, res, next) => {
                             });
                             if (paymentMode === "0") {
                                 await Cart.destroy({ where: { userSlug: user.slug } });
-
                             }
                             await Promise.all(createOrderDetail).then((result) => {
                                 res.status(200).json({
@@ -139,7 +161,6 @@ const generateOrder = async (req, res, next) => {
                                 message: "Failed! Order not created"
                             })
                         }
-
                     } else {
                         return res.status(300).send({
                             status: 300,
@@ -155,11 +176,10 @@ const generateOrder = async (req, res, next) => {
             } else {
                 return res.status(400).json({
                     status: 400,
-                    message: "Failed! Address is not found"
+                    message: "Failed! No address found. Please select an address."
                 })
             }
         }
-
     } catch (error) {
         return res.status(500).json({
             status: 500,
