@@ -1,0 +1,40 @@
+ <!-- start -->
+
+    <script src="plugins/assets/js/jquery.min.js"></script>
+    <script src="plugins/assets/js/bootstrap.bundle.min.js"></script>
+    <script src="plugins/assets/js/jquery.hoverIntent.min.js"></script>
+    <script src="plugins/assets/js/jquery.waypoints.min.js"></script>
+    <script src="plugins/assets/js/superfish.min.js"></script>
+    <script src="plugins/assets/js/owl.carousel.min.js"></script>
+    <script src="plugins/assets/js/wNumb.js"></script>
+    <script src="plugins/assets/js/jquery.plugin.min.js"></script>
+    <script src="aplugins/ssets/js/jquery.magnific-popup.min.js"></script>
+    <script src="plugins/assets/js/jquery.countdown.min.js"></script>
+    <script src="plugins/assets/js/jquery.elevateZoom.min.js"></script>
+    <script src="plugins/assets/js/bootstrap-input-spinner.js"></script>
+    <!-- Main JS File -->
+    <script src="plugins/assets/js/main.js"></script>
+    <script src="plugins/assets/js/demos/demo-2.js"></script>
+
+    <!-- end -->
+
+    const items = [...Array(1000).keys()];
+
+
+     <Accordion defaultExpanded>
+        <AccordionSummary
+          expandIcon={<ExpandMoreIcon />}
+          aria-controls="panel3-content"
+          id="panel3-header"
+        >
+          Accordion Actions
+        </AccordionSummary>
+        <AccordionDetails>
+          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse
+          malesuada lacus ex, sit amet blandit leo lobortis eget.
+        </AccordionDetails>
+        <AccordionActions>
+          <Button>Cancel</Button>
+          <Button>Agree</Button>
+        </AccordionActions>
+      </Accordion>

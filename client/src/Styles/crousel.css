@@ -1,0 +1,21 @@
+  .swiper-grid-column > .swiper-wrapper{
+    display: grid;
+    grid-template-rows: 1fr 1fr;
+    grid-auto-flow: column;
+    }
+  
+    .swiper-blog-button-prev{
+      position: absolute;
+      width: 50px;
+      height: 200px;
+  top: 80px;
+  right: 0;
+      background-color: red;
+    }
+
+    .swiper-blog-button-next{
+      width: 50px;
+      height: 100px;
+      background-color: red;
+      position: absolute;
+    }

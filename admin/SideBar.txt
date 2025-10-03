@@ -1,0 +1,322 @@
+    const [navBarState, setNavBarState] = useState({
+        dashboard: false,
+        customer: false,
+        catlog: false,
+        sale: false,
+        marketing: false,
+        cms: false,
+        software: false,
+        atlEquipments: false,
+        transaction: false,
+        logout: false
+    });
+
+
+     <aside className="main-sidebar sidebar-dark-primary elevation-4">
+            {/* <!-- Brand Logo --> */}
+            <a href="index3.html" className="brand-link">
+                <img src={logo} alt="AdminLTE Logo" className="brand-image img-circle elevation-3" style={{ opacity: "0.8" }} />
+                <span className="brand-text font-weight-light">AdminLTE 3</span>
+            </a>
+
+            {/* <!-- Sidebar --> */}
+            <div className="sidebar">
+                {/* <!-- Sidebar user panel (optional) --> */}
+                <div className="user-panel mt-3 pb-3 mb-3 d-flex">
+                    <div className="image">
+                        <img src={user} className="img-circle elevation-2" alt="User Image" />
+                    </div>
+                    <div className="info">
+                        <a href="#" className="d-block">Alexander Pierce</a>
+                    </div>
+                </div>
+
+                {/* <!-- SidebarSearch Form --> */}
+                <div className="form-inline">
+                    <div className="input-group" data-widget="sidebar-search">
+                        <input className="form-control form-control-sidebar" type="search" placeholder="Search" aria-label="Search" />
+                        <div className="input-group-append">
+                            <button className="btn btn-sidebar">
+                                <i className="fas fa-search fa-fw"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                {/* <!-- Sidebar Menu --> */}
+                <nav className="mt-2">
+                    <ul className="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
+
+                        <li className='nav-item'>
+                            <a href="#" className="nav-link">
+                                <i className="nav-icon fas fa-tachometer-alt"></i>
+                                <p>Dashboard</p>
+                            </a>
+                        </li>
+
+                        <li className={navBarState.customer === true ? "nav-item menu-is-opening menu-open" : "nav-item"}
+                            onClick={() => setNavBarState({ ...navBarState, customer: navBarState.customer ? false : true })}>
+                            <a href="#" className="nav-link">
+                                <i className="nav-icon fas fa-copy"></i>
+                                <p>
+                                    Customer
+                                    <i className="fas fa-angle-left right"></i>
+                                    <span className="badge badge-info right">6</span>
+                                </p>
+                            </a>
+                            <ul className="nav nav-treeview">
+                                <li className="nav-item">
+                                    <a href="pages/layout/top-nav.html" className="nav-link">
+                                        <i className="far fa-circle nav-icon"></i>
+                                        <p>Reviews</p>
+                                    </a>
+                                </li>
+                                <li className="nav-item">
+                                    <a href="pages/layout/top-nav-sidebar.html" className="nav-link">
+                                        <i className="far fa-circle nav-icon"></i>
+                                        <p>Cart</p>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+
+                        <li className={navBarState.catlog === true ? "nav-item menu-is-opening menu-open" : "nav-item"}
+                            onClick={() => setNavBarState({ ...navBarState, catlog: navBarState.catlog ? false : true })}>
+                            <a href="#" className="nav-link">
+                                <i className="nav-icon fas fa-chart-pie"></i>
+                                <p>
+                                    Catlog
+                                    <i className="right fas fa-angle-left"></i>
+                                </p>
+                            </a>
+                            <ul className="nav nav-treeview">
+                                <li className="nav-item">
+                                    <a href="pages/charts/chartjs.html" className="nav-link">
+                                        <i className="far fa-circle nav-icon"></i>
+                                        <p>Product</p>
+                                    </a>
+                                </li>
+                                <li className="nav-item">
+                                    <a href="pages/charts/flot.html" className="nav-link">
+                                        <i className="far fa-circle nav-icon"></i>
+                                        <p>Category</p>
+                                    </a>
+                                </li>
+                                <li className="nav-item">
+                                    <a href="pages/charts/inline.html" className="nav-link">
+                                        <i className="far fa-circle nav-icon"></i>
+                                        <p>Sub-Category</p>
+                                    </a>
+                                </li>
+                                <li className="nav-item">
+                                    <a href="pages/charts/uplot.html" className="nav-link">
+                                        <i className="far fa-circle nav-icon"></i>
+                                        <p>Attributes</p>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+
+                        <li className={navBarState.sale === true ? "nav-item menu-is-opening menu-open" : "nav-item"}
+                            onClick={() => setNavBarState({ ...navBarState, sale: navBarState.sale ? false : true })}>
+                            <a href="#" className="nav-link">
+                                <i className="nav-icon fas fa-tree"></i>
+                                <p>
+                                    Sale
+                                    <i className="fas fa-angle-left right"></i>
+                                </p>
+                            </a>
+                            <ul className="nav nav-treeview">
+                                <li className="nav-item">
+                                    <a href="pages/UI/general.html" className="nav-link">
+                                        <i className="far fa-circle nav-icon"></i>
+                                        <p>Order</p>
+                                    </a>
+                                </li>
+                                <li className="nav-item">
+                                    <a href="pages/UI/icons.html" className="nav-link">
+                                        <i className="far fa-circle nav-icon"></i>
+                                        <p>Shipment</p>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+
+                        <li className={navBarState.marketing === true ? "nav-item menu-is-opening menu-open" : "nav-item"}
+                            onClick={() => setNavBarState({ ...navBarState, marketing: navBarState.marketing ? false : true })}>
+                            <a href="#" className="nav-link">
+                                <i className="nav-icon fas fa-edit"></i>
+                                <p>
+                                    Marketing
+                                    <i className="fas fa-angle-left right"></i>
+                                </p>
+                            </a>
+                            <ul className="nav nav-treeview">
+                                <li className="nav-item">
+                                    <a href="pages/forms/general.html" className="nav-link">
+                                        <i className="far fa-circle nav-icon"></i>
+                                        <p>Contact Us</p>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+
+                        <li className={navBarState.cms === true ? "nav-item menu-is-opening menu-open" : "nav-item"}
+                            onClick={() => setNavBarState({ ...navBarState, cms: navBarState.cms ? false : true })}>
+                            <a href="#" className="nav-link">
+                                <i className="nav-icon fas fa-table"></i>
+                                <p>
+                                    CMS
+                                    <i className="fas fa-angle-left right"></i>
+                                </p>
+                            </a>
+                            <ul className="nav nav-treeview">
+                                <li className="nav-item">
+                                    <a href="pages/tables/simple.html" className="nav-link">
+                                        <i className="far fa-circle nav-icon"></i>
+                                        <p>Pages</p>
+                                    </a>
+                                </li>
+                                <li className="nav-item">
+                                    <a href="pages/tables/data.html" className="nav-link">
+                                        <i className="far fa-circle nav-icon"></i>
+                                        <p>Slider</p>
+                                    </a>
+                                </li>
+                                <li className="nav-item">
+                                    <a href="pages/tables/jsgrid.html" className="nav-link">
+                                        <i className="far fa-circle nav-icon"></i>
+                                        <p>Blog</p>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+
+                        <li className={navBarState.software === true ? "nav-item menu-is-opening menu-open" : "nav-item"}
+                            onClick={() => setNavBarState({ ...navBarState, software: navBarState.software ? false : true })}>
+                            <a href="#" className="nav-link">
+                                <i className="nav-icon far fa-envelope"></i>
+                                <p>
+                                    Software
+                                    <i className="fas fa-angle-left right"></i>
+                                </p>
+                            </a>
+                            <ul className="nav nav-treeview">
+                                <li className="nav-item">
+                                    <a href="pages/mailbox/mailbox.html" className="nav-link">
+                                        <i className="far fa-circle nav-icon"></i>
+                                        <p>Softwares</p>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+
+                        <li className={navBarState.atlEquipments === true ? "nav-item menu-is-opening menu-open" : "nav-item"}
+                            onClick={() => setNavBarState({ ...navBarState, atlEquipments: navBarState.atlEquipments ? false : true })}>
+                            <a href="#" className="nav-link">
+                                <i className="nav-icon fas fa-book"></i>
+                                <p>
+                                    Atl Equpments
+                                    <i className="fas fa-angle-left right"></i>
+                                </p>
+                            </a>
+                            <ul className="nav nav-treeview">
+                                <li className="nav-item">
+                                    <a href="pages/examples/invoice.html" className="nav-link">
+                                        <i className="far fa-circle nav-icon"></i>
+                                        <p>Category</p>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+
+                        <li className="nav-item">
+                            <a href="pages/calendar.html" className="nav-link">
+                                <i className="nav-icon far fa-calendar-alt"></i>
+                                <p>
+                                    Transaction
+                                    <span className="badge badge-info right">2</span>
+                                </p>
+                            </a>
+                        </li>
+
+                        <li className="nav-item">
+                            <a href="pages/gallery.html" className="nav-link">
+                                <i className="nav-icon far fa-image"></i>
+                                <p>
+                                    Logout
+                                </p>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </aside>
+
+
+        11186
+
+
+
+        <div className={sideBarState === "fixed" ? "hold-transition sidebar-mini layout-fixed mainLayout" : "sidebar-mini layout-fixed sidebar-collapse mainLayout"} style={{ height: "auto" }}>
+                <div className="wrapper">
+                    {/* <!-- Navbar --> */}
+                    <NavHeader />
+                    {/* <!-- Main Side Bar --> */}
+                    <NavSideBar />
+                    {/* <!-- Main Side Bar --> */}
+
+                    {/* <!-- Main Content --> */}
+                    {children}
+
+                    {/* Admin Footer */}
+                    <NavFooter />
+                </div>
+            </div>
+
+
+                        <meta charSet="utf-8" />
+            <meta name="viewport" content="width=device-width, initial-scale=1" />
+            <title>AdminLTE 3 | Log in (v2)</title>
+
+
+
+
+
+
+
+
+            const ITEMS = [
+    {
+        id: '1',
+        label: 'Documents',
+        children: [
+            {
+                id: '1.1',
+                label: 'Company',
+                children: [
+                    { id: '1.1.1', label: 'Invoice', fileType: 'pdf' },
+                    { id: '1.1.2', label: 'Meeting notes', fileType: 'doc' },
+                    { id: '1.1.3', label: 'Tasks list', fileType: 'doc' },
+                    { id: '1.1.4', label: 'Equipment', fileType: 'pdf' },
+                    { id: '1.1.5', label: 'Video conference', fileType: 'video' },
+                ],
+            },
+            { id: '1.2', label: 'Personal', fileType: 'folder' },
+            { id: '1.3', label: 'Group photo', fileType: 'image' },
+        ],
+    },
+    {
+        id: '2',
+        label: 'Bookmarked',
+        fileType: 'pinned',
+        children: [
+            { id: '2.1', label: 'Learning materials', fileType: 'folder' },
+            { id: '2.2', label: 'News', fileType: 'folder' },
+            { id: '2.3', label: 'Forums', fileType: 'folder' },
+            { id: '2.4', label: 'Travel documents', fileType: 'pdf' },
+        ],
+    },
+    { id: '3', label: 'History', fileType: 'folder' },
+    { id: '4', label: 'Trash', fileType: 'trash' },
+];
