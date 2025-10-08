@@ -23,7 +23,7 @@ const { addRole, getRole, updateRole,deleteRole } = require("../Controller/RoleC
 const { createApplicationInfo, getApplicationInfo, addShipping, getShipping, addAdminTheme, getAdminTheme, createWebsiteTheme, getWebsiteTheme } = require("../Controller/SettingController");
 const { createSocialLink, getSocialLink, updateSocialLink } = require("../Controller/SocialLinkController");
 const { addSubCategory, getAllSubCategory, getSubCategory, updateSubCategory, deleteSubCategory, changeSubCategoryStatus, createSubCategoryMulText } = require("../Controller/SubCategoryController");
-const { userRegister, userLogin, getProfile, editProfile, changePassword, sendLoginOtp, verifyLoginOtp, getCustomer } = require("../Controller/UserController");
+const { userRegister, userLogin, getProfile, editProfile, changePassword, sendLoginOtp, verifyLoginOtp, getCustomer,sendForgotPasswordOtp,resetPasswordWithOtp } = require("../Controller/UserController");
 const { getCountry, getState, checkSession, createCity, getCity, createPincode, getPincode } = require("../Controller/UtilsController");
 const { addWishList, getWishList, removeWishList } = require("../Controller/WishListController");
 const { UserAuth, AdminAuth } = require("../Middleware/Auth");
@@ -45,6 +45,12 @@ router.post("/sendLoginOtp", uploadFiles.none(), sendLoginOtp);
 //    verify login otp
 router.post("/verifyLoginOtp", uploadFiles.none(), verifyLoginOtp);
 
+//    send forgot password otp
+router.post("/sendForgotPasswordOtp", uploadFiles.none(), sendForgotPasswordOtp);
+
+//    reset password with otp
+router.post("/resetPasswordWithOtp", uploadFiles.none(), resetPasswordWithOtp);
+
 //    get profile
 router.get("/user_profile", UserAuth, uploadFiles.none(), getProfile);
 
@@ -55,10 +61,10 @@ router.post("/send_otp", uploadFiles.none(), sendOtp);
 router.post("/verify_otp", uploadFiles.none(), verifyOtp);
 
 //    edit profile
-router.get("/edit_profile", uploadFiles.single("avatar"), editProfile);
+router.post("/edit_profile", uploadFiles.single("avatar"), editProfile); // Changed from GET to POST
 
 //    change password
-router.get("/change_password", uploadFiles.none(), changePassword);
+router.post("/change_password", uploadFiles.none(), changePassword); // Changed from GET to POST
 
 //    check ip
 router.get("/checkIp", uploadFiles.none(), checkIp);

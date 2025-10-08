@@ -80,6 +80,10 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.STRING,
             allowNull: true,
         },
+        otp_expires: {  // ADD THIS MISSING FIELD
+            type: DataTypes.DATE,
+            allowNull: true,
+        },
         otp_status: {
             type: DataTypes.STRING,
             allowNull: true,
