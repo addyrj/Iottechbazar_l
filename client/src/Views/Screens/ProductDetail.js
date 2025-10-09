@@ -348,12 +348,14 @@ const ProductDetail = () => {
                                         {/* End .product-title */}
                                         <div className="ratings-container">
                                             <div className="ratings">
-                                                <div className="ratings-val" style={{ width:
-                                                 Math.round(averageRating) === 1 ? "20%" : 
-                                                 Math.round(averageRating) === 2 ? "40%":
-                                                 Math.round(averageRating) === 3 ? "60%":
-                                                 Math.round(averageRating) === 4 ? "80%":
-                                                  "100%"}} ></div>
+                                                <div className="ratings-val" style={{
+                                                    width:
+                                                        Math.round(averageRating) === 1 ? "20%" :
+                                                            Math.round(averageRating) === 2 ? "40%" :
+                                                                Math.round(averageRating) === 3 ? "60%" :
+                                                                    Math.round(averageRating) === 4 ? "80%" :
+                                                                        "100%"
+                                                }} ></div>
                                                 {/* End .ratings-val */}
                                             </div>
                                             {/* End .ratings */}
@@ -462,16 +464,15 @@ const ProductDetail = () => {
                                                     title="Wishlist"
                                                     onClick={() => addWishList(id, slug)}
                                                 >
-                                                    <span>Add to Wishlist</span>
+                                                    <span>Add Wishlist</span>
                                                 </a>
-                                                <a
-                                                    href="#"
-                                                    className="btn-product btn-compare"
-                                                    title="Compare"
-                                                >
-                                                    <span>Add to Compare</span>
-                                                </a>
+
+                                                <button className="buttonStyle" /* onClick={handleOpen} */>
+                                                    <i className="fa fa-bag-shopping mr-2"></i>
+                                                    <span>Buy Now</span>
+                                                </button>
                                             </div>
+
                                             {/* End .details-action-wrapper */}
                                         </div>
                                         {/* End .product-details-action */}
@@ -857,13 +858,13 @@ const ProductDetail = () => {
                                             >
                                                 <span>Quick view</span>
                                             </a>
-                                            <a
+                                            {/* <a
                                                 href="#"
                                                 className="btn-product-icon btn-compare"
                                                 title="Compare"
                                             >
                                                 <span>Compare</span>
-                                            </a>
+                                            </a> */}
                                         </div>
                                         {/* End .product-action-vertical */}
                                         <div className="product-action">
@@ -1207,6 +1208,17 @@ const Wrapper = styled.section`
     left: auto;
     right: 140px;
   }
+    .details-action-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 15px; /* space between wishlist and buy now buttons */
+  margin-top: 10px;
+}
+
+
+.details-action-wrapper .buttonStyle {
+  margin-left: 0; /* aligns perfectly with wishlist */
+}
 `;
 
 export default ProductDetail;

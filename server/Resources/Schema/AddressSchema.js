@@ -21,8 +21,7 @@ module.exports = (sequelize, DataTypes) => {
         },
         email: {
             type: DataTypes.STRING,
-            unique: true,
-            allowNull: true,
+            allowNull: true, // Remove unique: true
         },
         contact: {
             type: DataTypes.STRING,
@@ -60,9 +59,10 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.INTEGER,
             allowNull: true,
         },
-        defautAddress: {
-            type: DataTypes.STRING,
+        defaultAddress: {
+            type: DataTypes.BOOLEAN, // Change to BOOLEAN for better handling
             allowNull: true,
+            defaultValue: false
         },
         status: {
             type: DataTypes.STRING,

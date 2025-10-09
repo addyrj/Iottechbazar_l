@@ -32,9 +32,10 @@ const Checkout = () => {
   });
 
   const [selectedAddress, setSelectedAddress] = useState(null);
+  const [editMode, setEditMode] = useState(false);
+  const [editingAddress, setEditingAddress] = useState(null);
 
   const handleAddressSelect = (address) => {
-    // If clicking the already selected address, deselect it
     if (selectedAddress?.id === address.id) {
       setSelectedAddress(null);
     } else {
@@ -42,19 +43,59 @@ const Checkout = () => {
     }
   };
 
-  // Auto-select default address on component load
-useEffect(() => {
-  if (addressList.length > 0 && !selectedAddress) {
-    const defaultAddress = addressList.find(addr => addr.defautAddress === "true");
-    if (defaultAddress) {
-      setSelectedAddress(defaultAddress);
-    } else {
-      // if no default address, select the first one
-      setSelectedAddress(addressList[0]);
-    }
-  }
-}, [addressList, selectedAddress]);
+// Handle Edit Address
+const handleEditAddress = (address) => {
+  console.log("Address to edit:", address); // Debug log
+  setEditingAddress(address);
+  setEditMode(true);
+  // Navigate to edit address page with address data
+  navigate("/editAddress", { state: { addressData: address } });
+};
 
+  // Handle Delete Address
+  const handleDeleteAddress = async (addressId) => {
+    // Show confirmation dialog
+    if (window.confirm("Are you sure you want to delete this address?")) {
+      try {
+        dispatch(setLoader(true));
+      const response = await axios.post(
+  process.env.REACT_APP_BASE_URL + "deleteAddress",  // ✅ Correct
+  { addressId: addressId },
+  postHeaderWithToken
+);
+
+        if (response.data.status === 200) {
+          toast.success(response.data.message);
+          // Refresh address list
+          dispatch(getUserAddress({ navigate: navigate }));
+          
+          // If deleted address was selected, clear selection
+          if (selectedAddress?.id === addressId) {
+            setSelectedAddress(null);
+          }
+        } else {
+          toast.error(response.data.message);
+        }
+      } catch (error) {
+        console.error("Delete address error:", error);
+        toast.error(error?.response?.data?.message || "Failed to delete address");
+      } finally {
+        dispatch(setLoader(false));
+      }
+    }
+  };
+
+  // Auto-select default address on component load
+  useEffect(() => {
+    if (addressList.length > 0 && !selectedAddress) {
+      const defaultAddress = addressList.find(addr => addr.defaultAddress === "true");
+      if (defaultAddress) {
+        setSelectedAddress(defaultAddress);
+      } else {
+        setSelectedAddress(addressList[0]);
+      }
+    }
+  }, [addressList, selectedAddress]);
 
   const getTotalSellPrice = () => {
     let priceArray = [];
@@ -116,17 +157,16 @@ useEffect(() => {
   }
 
   const getAddressType = (addType) => {
-    if (addType === 0) {
+    if (addType === 0 || addType === "0") {
       return "Home";
-    } else if (addType === 1) {
+    } else if (addType === 1 || addType === "1") {
       return "Office";
-    } else if (addType === 2) {
+    } else if (addType === 2 || addType === "2") {
       return "Other"
     }
   }
 
   const generateOrder = async () => {
-    // Check if address is selected
     if (!selectedAddress) {
       toast.error("Please select an address to continue");
       return;
@@ -158,11 +198,10 @@ useEffect(() => {
     } else {
       dispatch(setLoader(true));
       
-      // Send selected address ID to backend
       const requestData = {
         amount: totalPrice, 
         paymentMode: paymentMode,
-        selectedAddressId: selectedAddress?.id // Add selected address ID
+        selectedAddressId: selectedAddress?.id
       };
 
       axios.post(process.env.REACT_APP_BASE_URL + "generateOrder", requestData, postHeaderWithToken)
@@ -361,12 +400,12 @@ useEffect(() => {
                             <div className="col-lg-4" key={index}>
                               <div className="card card-dashboard">
                                 <div className="card-body">
-                                <input 
-  type="checkbox" 
-  className='float-right mb-2' 
-  checked={selectedAddress?.id === item.id} 
-  onChange={() => handleAddressSelect(item)}
-/>
+                                  <input 
+                                    type="checkbox" 
+                                    className='float-right mb-2' 
+                                    checked={selectedAddress?.id === item.id} 
+                                    onChange={() => handleAddressSelect(item)}
+                                  />
 
                                   <p>
                                     Name : <strong className='userSuffix'>{item.name}</strong>
@@ -377,17 +416,24 @@ useEffect(() => {
                                     <br />
                                     Pincode : <strong className='userSuffix'>{item.pincode}</strong>
                                     <br />
-                                    Addrss Type : <strong className='userSuffix'>{getAddressType(item.addressType)}</strong>
+                                    Address Type : <strong className='userSuffix'>{getAddressType(item.addressType)}</strong>
                                     <br />
                                     <br />
                                     <div className='btnLayout'>
-                                      <button className="btn btnEdit btn-outline-primary-2">
+                                      <button 
+                                        className="btn btnEdit btn-outline-primary-2"
+                                        onClick={() => handleEditAddress(item)}
+                                      >
                                         <span>Edit</span>
                                         <i className="icon-edit" />
                                       </button>
-                                      <button type='button' className="btn btnDelete btn-outline-primary-2">
+                                      <button 
+                                        type='button' 
+                                        className="btn btnDelete btn-outline-primary-2"
+                                        onClick={() => handleDeleteAddress(item.id)}
+                                      >
                                         <span>Delete</span>
-                                        <i className="icon-long-arrow-right" />
+                                        <i className="icon-trash" />
                                       </button>
                                     </div>
                                   </p>
@@ -598,6 +644,10 @@ const Wrapper = styled.section`
   }
   .mobileHandling{
     display: none;
+  }
+  .btnLayout{
+    display: flex;
+    flex-direction: column;
   }
   }
   .card-body{

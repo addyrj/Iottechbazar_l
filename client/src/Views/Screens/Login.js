@@ -75,120 +75,120 @@ const Login = () => {
         return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
     };
 
-   const registerUser = () => {
-    if (!privacyChecked) {
-        toast.error("Failed! Please check privacy policy");
-        return;
-    } else if (isEmpty(registerInfo.Name)) {
-        toast.error("Failed! Please enter name");
-        return;
-    } else if (isEmpty(registerInfo.Email)) {
-        toast.error("Failed! Please enter email");
-        return;
-    } else if (isEmpty(registerInfo.Contact)) {
-        toast.error("Failed! Please enter contact");
-        return;
-    } else if (isEmpty(registerInfo.Password)) {
-        toast.error("Failed! Please enter password");
-        return;
-    } else if (isEmpty(registerInfo.ConfirmPassword)) {
-        toast.error("Failed! Please enter confirm password");
-        return;
-    } else if (registerInfo.Password !== registerInfo.ConfirmPassword) {
-        toast.error("Failed! Password and confirm password must be equal");
-        return;
-    } else {
-        dispatch(setLoader(true));
-        console.log("Registering user with data:", registerInfo);
-        
-        // Create FormData for file upload
-        const formData = new FormData();
-        formData.append('Name', registerInfo.Name);
-        formData.append('Email', registerInfo.Email);
-        formData.append('Contact', registerInfo.Contact);
-        formData.append('Password', registerInfo.Password);
-        formData.append('ConfirmPassword', registerInfo.ConfirmPassword);
-        if (registerInfo.avatar && registerInfo.avatar instanceof File) {
-            formData.append('avatar', registerInfo.avatar);
-        }
+    const registerUser = () => {
+        if (!privacyChecked) {
+            toast.error("Failed! Please check privacy policy");
+            return;
+        } else if (isEmpty(registerInfo.Name)) {
+            toast.error("Failed! Please enter name");
+            return;
+        } else if (isEmpty(registerInfo.Email)) {
+            toast.error("Failed! Please enter email");
+            return;
+        } else if (isEmpty(registerInfo.Contact)) {
+            toast.error("Failed! Please enter contact");
+            return;
+        } else if (isEmpty(registerInfo.Password)) {
+            toast.error("Failed! Please enter password");
+            return;
+        } else if (isEmpty(registerInfo.ConfirmPassword)) {
+            toast.error("Failed! Please enter confirm password");
+            return;
+        } else if (registerInfo.Password !== registerInfo.ConfirmPassword) {
+            toast.error("Failed! Password and confirm password must be equal");
+            return;
+        } else {
+            dispatch(setLoader(true));
+            console.log("Registering user with data:", registerInfo);
 
-        const config = {
-            headers: {
-                'Content-Type': 'multipart/form-data',
+            // Create FormData for file upload
+            const formData = new FormData();
+            formData.append('Name', registerInfo.Name);
+            formData.append('Email', registerInfo.Email);
+            formData.append('Contact', registerInfo.Contact);
+            formData.append('Password', registerInfo.Password);
+            formData.append('ConfirmPassword', registerInfo.ConfirmPassword);
+            if (registerInfo.avatar && registerInfo.avatar instanceof File) {
+                formData.append('avatar', registerInfo.avatar);
             }
-        };
 
-        axios.post(process.env.REACT_APP_BASE_URL + "user_register", formData, config)
-            .then((res) => {
-                dispatch(setLoader(false));
-                console.log("Registration response:", res.data);
-                
-                if (res.data.status === 200) {
-                    // Auto-login after successful registration
-                    localStorage.setItem("iottechUserInfo", JSON.stringify({ 
-                        token: res.data.token, 
-                        userId: res.data.id, 
-                        lastLogin: res.data.lastLogin 
-                    }));
-                    
-                    setRegisterInfo({
-                        Name: "",
-                        Email: "",
-                        Contact: "",
-                        Password: "",
-                        ConfirmPassword: "",
-                        avatar: {}
-                    });
-                    
-                    toast.success(res?.data?.message || "Registration successful! Auto-login completed.");
-                    
-                    // Create user track log and navigate to home
-                    createUserTrackLog(res.data.token);
-                } else {
-                    toast.error(res?.data?.message || "Registration completed with warnings");
+            const config = {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
                 }
-            })
-            .catch((error) => {
-                console.log("Registration error:", error);
-                dispatch(setLoader(false));
-                
-                if (error.response) {
-                    const status = error.response.status;
-                    const errorData = error.response.data;
-                    
-                    if (status === 400 || status === 300) {
-                        toast.error(errorData?.message || "Please check your input and try again");
-                    } else if (status === 500) {
-                        toast.error("Server error. Please try again later.");
+            };
+
+            axios.post(process.env.REACT_APP_BASE_URL + "user_register", formData, config)
+                .then((res) => {
+                    dispatch(setLoader(false));
+                    console.log("Registration response:", res.data);
+
+                    if (res.data.status === 200) {
+                        // Auto-login after successful registration
+                        localStorage.setItem("iottechUserInfo", JSON.stringify({
+                            token: res.data.token,
+                            userId: res.data.id,
+                            lastLogin: res.data.lastLogin
+                        }));
+
+                        setRegisterInfo({
+                            Name: "",
+                            Email: "",
+                            Contact: "",
+                            Password: "",
+                            ConfirmPassword: "",
+                            avatar: {}
+                        });
+
+                        toast.success(res?.data?.message || "Registration successful! Auto-login completed.");
+
+                        // Create user track log and navigate to home
+                        createUserTrackLog(res.data.token);
                     } else {
-                        toast.error(errorData?.message || "Registration failed");
+                        toast.error(res?.data?.message || "Registration completed with warnings");
                     }
-                } else if (error.request) {
-                    toast.error("Network error. Please check your connection.");
-                } else {
-                    toast.error("Registration failed: " + error.message);
-                }
-            });
+                })
+                .catch((error) => {
+                    console.log("Registration error:", error);
+                    dispatch(setLoader(false));
+
+                    if (error.response) {
+                        const status = error.response.status;
+                        const errorData = error.response.data;
+
+                        if (status === 400 || status === 300) {
+                            toast.error(errorData?.message || "Please check your input and try again");
+                        } else if (status === 500) {
+                            toast.error("Server error. Please try again later.");
+                        } else {
+                            toast.error(errorData?.message || "Registration failed");
+                        }
+                    } else if (error.request) {
+                        toast.error("Network error. Please check your connection.");
+                    } else {
+                        toast.error("Registration failed: " + error.message);
+                    }
+                });
+        }
     }
-}
 
     const loginUser = () => {
         if (isEmpty(loginInfo.userId) || isEmpty(loginInfo.userPass)) {
             toast.error("Failed! All fields must be required!")
         } else {
             dispatch(setLoader(true));
-            axios.post(process.env.REACT_APP_BASE_URL + "user_login", { 
-                Email: loginInfo.userId, 
-                Password: loginInfo.userPass, 
-                rememberState: loginInfo.rememberMe 
+            axios.post(process.env.REACT_APP_BASE_URL + "user_login", {
+                Email: loginInfo.userId,
+                Password: loginInfo.userPass,
+                rememberState: loginInfo.rememberMe
             }, postHeaderWithoutToken)
                 .then((res) => {
                     if (res.data.status === 200) {
                         dispatch(setLoader(false));
-                        localStorage.setItem("iottechUserInfo", JSON.stringify({ 
-                            token: res.data.token, 
-                            userId: res.data.id, 
-                            lastLogin: res.data.lastLogin 
+                        localStorage.setItem("iottechUserInfo", JSON.stringify({
+                            token: res.data.token,
+                            userId: res.data.id,
+                            lastLogin: res.data.lastLogin
                         }))
                         createUserTrackLog(res.data.token);
                         toast.success(res?.data?.message);
@@ -203,67 +203,67 @@ const Login = () => {
     }
 
     // Send OTP for Phone Login
-  // Send OTP for Phone Login - Improved version
-const sendPhoneLoginOtp = () => {
-    if (isEmpty(otpInfo.contact)) {
-        toast.error("Failed! Please enter contact number");
-        return;
-    } else if (otpInfo.contact.length !== 10) {
-        toast.error("Failed! Contact number must be 10 digits");
-        return;
+    // Send OTP for Phone Login - Improved version
+    const sendPhoneLoginOtp = () => {
+        if (isEmpty(otpInfo.contact)) {
+            toast.error("Failed! Please enter contact number");
+            return;
+        } else if (otpInfo.contact.length !== 10) {
+            toast.error("Failed! Contact number must be 10 digits");
+            return;
+        }
+
+        console.log("Sending OTP for contact:", otpInfo.contact);
+
+        dispatch(setLoader(true));
+        axios.post(process.env.REACT_APP_BASE_URL + "sendLoginOtp",
+            { Contact: otpInfo.contact },
+            postHeaderWithoutToken
+        )
+            .then((res) => {
+                dispatch(setLoader(false));
+                console.log("OTP Response:", res.data);
+
+                if (res.data.status === 200) {
+                    setOtpState(true);
+                    setOtpType('login');
+                    startOtpTimer();
+                    toast.success(res?.data?.message);
+                    console.log("OTP sent successfully");
+
+                    // Check if OTP is returned in response (for development)
+                    if (res.data.info && res.data.info.otp) {
+                        console.log("OTP for development:", res.data.info.otp);
+                        // Auto-fill OTP for easier testing
+                        setOtpInfo(prev => ({ ...prev, otp: res.data.info.otp }));
+                        toast.success(`OTP: ${res.data.info.otp} (Development Mode)`);
+                    }
+                } else {
+                    toast.error(res?.data?.message || "Failed to send OTP");
+                }
+            })
+            .catch((error) => {
+                console.log("OTP sending error:", error);
+                dispatch(setLoader(false));
+
+                if (error.response) {
+                    // Server responded with error status
+                    const errorMsg = error.response.data?.message || "Failed to send OTP";
+                    toast.error(errorMsg);
+
+                    // If it's a 400 error (user not found), show specific message
+                    if (error.response.status === 400) {
+                        toast.error("No account found with this phone number. Please register first.");
+                    }
+                } else if (error.request) {
+                    // Network error
+                    toast.error("Network error. Please check your internet connection.");
+                } else {
+                    // Other errors
+                    toast.error("Failed to send OTP: " + error.message);
+                }
+            })
     }
-
-    console.log("Sending OTP for contact:", otpInfo.contact);
-
-    dispatch(setLoader(true));
-    axios.post(process.env.REACT_APP_BASE_URL + "sendLoginOtp", 
-        { Contact: otpInfo.contact }, 
-        postHeaderWithoutToken
-    )
-    .then((res) => {
-        dispatch(setLoader(false));
-        console.log("OTP Response:", res.data);
-        
-        if (res.data.status === 200) {
-            setOtpState(true);
-            setOtpType('login');
-            startOtpTimer();
-            toast.success(res?.data?.message);
-            console.log("OTP sent successfully");
-            
-            // Check if OTP is returned in response (for development)
-            if (res.data.info && res.data.info.otp) {
-                console.log("OTP for development:", res.data.info.otp);
-                // Auto-fill OTP for easier testing
-                setOtpInfo(prev => ({ ...prev, otp: res.data.info.otp }));
-                toast.success(`OTP: ${res.data.info.otp} (Development Mode)`);
-            }
-        } else {
-            toast.error(res?.data?.message || "Failed to send OTP");
-        }
-    })
-    .catch((error) => {
-        console.log("OTP sending error:", error);
-        dispatch(setLoader(false));
-        
-        if (error.response) {
-            // Server responded with error status
-            const errorMsg = error.response.data?.message || "Failed to send OTP";
-            toast.error(errorMsg);
-            
-            // If it's a 400 error (user not found), show specific message
-            if (error.response.status === 400) {
-                toast.error("No account found with this phone number. Please register first.");
-            }
-        } else if (error.request) {
-            // Network error
-            toast.error("Network error. Please check your internet connection.");
-        } else {
-            // Other errors
-            toast.error("Failed to send OTP: " + error.message);
-        }
-    })
-}
 
     // Verify OTP for Phone Login
     const verifyPhoneLoginOtp = () => {
@@ -278,40 +278,40 @@ const sendPhoneLoginOtp = () => {
         console.log("Verifying OTP:", otpInfo.otp, "for contact:", otpInfo.contact);
 
         dispatch(setLoader(true));
-        axios.post(process.env.REACT_APP_BASE_URL + "verifyLoginOtp", 
-            { 
-                Contact: otpInfo.contact, 
-                Otp: otpInfo.otp 
-            }, 
+        axios.post(process.env.REACT_APP_BASE_URL + "verifyLoginOtp",
+            {
+                Contact: otpInfo.contact,
+                Otp: otpInfo.otp
+            },
             postHeaderWithoutToken
         )
-        .then((res) => {
-            dispatch(setLoader(false));
-            if (res.data.status === 200) {
-                localStorage.setItem("iottechUserInfo", JSON.stringify({ 
-                    token: res.data.token, 
-                    userId: res.data.id, 
-                    lastLogin: res.data.lastLogin 
-                }))
-                createUserTrackLog(res.data.token);
-                toast.success(res?.data?.message);
-                console.log("Login successful");
-                // Reset OTP states
-                setOtpTimer(0);
-                setCanResendOtp(false);
-            } else {
-                toast.error(res?.data?.message || "OTP verification failed");
-            }
-        })
-        .catch((error) => {
-            console.log("OTP verification error:", error);
-            dispatch(setLoader(false));
-            if (error.response && error.response.data) {
-                toast.error(error.response.data.message || "OTP verification failed");
-            } else {
-                toast.error("Network error. Please try again.");
-            }
-        })
+            .then((res) => {
+                dispatch(setLoader(false));
+                if (res.data.status === 200) {
+                    localStorage.setItem("iottechUserInfo", JSON.stringify({
+                        token: res.data.token,
+                        userId: res.data.id,
+                        lastLogin: res.data.lastLogin
+                    }))
+                    createUserTrackLog(res.data.token);
+                    toast.success(res?.data?.message);
+                    console.log("Login successful");
+                    // Reset OTP states
+                    setOtpTimer(0);
+                    setCanResendOtp(false);
+                } else {
+                    toast.error(res?.data?.message || "OTP verification failed");
+                }
+            })
+            .catch((error) => {
+                console.log("OTP verification error:", error);
+                dispatch(setLoader(false));
+                if (error.response && error.response.data) {
+                    toast.error(error.response.data.message || "OTP verification failed");
+                } else {
+                    toast.error("Network error. Please try again.");
+                }
+            })
     }
 
     // Send OTP for Forgot Password
@@ -327,42 +327,42 @@ const sendPhoneLoginOtp = () => {
         console.log("Sending forgot password OTP for contact:", otpInfo.contact);
 
         dispatch(setLoader(true));
-        axios.post(process.env.REACT_APP_BASE_URL + "sendForgotPasswordOtp", 
-            { Contact: otpInfo.contact }, 
+        axios.post(process.env.REACT_APP_BASE_URL + "sendForgotPasswordOtp",
+            { Contact: otpInfo.contact },
             postHeaderWithoutToken
         )
-        .then((res) => {
-            dispatch(setLoader(false));
-            if (res.data.status === 200) {
-                setOtpState(true);
-                setOtpType('forgot_password');
-                startOtpTimer();
-                toast.success(res?.data?.message);
-                console.log("Forgot password OTP sent successfully");
-                
-                if (res.data.info.otp) {
-                    console.log("Forgot Password OTP for development:", res.data.info.otp);
-                    alert(`OTP for password reset: ${res.data.info.otp}`);
-                }
-            } else {
-                toast.error(res?.data?.message || "Failed to send OTP");
-            }
-        })
-        .catch((error) => {
-            console.log("Forgot password OTP sending error:", error);
-            dispatch(setLoader(false));
-            if (error.response) {
-                if (error.response.status === 404) {
-                    toast.error("Service temporarily unavailable. Please try email login.");
+            .then((res) => {
+                dispatch(setLoader(false));
+                if (res.data.status === 200) {
+                    setOtpState(true);
+                    setOtpType('forgot_password');
+                    startOtpTimer();
+                    toast.success(res?.data?.message);
+                    console.log("Forgot password OTP sent successfully");
+
+                    if (res.data.info.otp) {
+                        console.log("Forgot Password OTP for development:", res.data.info.otp);
+                        alert(`OTP for password reset: ${res.data.info.otp}`);
+                    }
                 } else {
-                    toast.error(error.response.data?.message || "Failed to send OTP");
+                    toast.error(res?.data?.message || "Failed to send OTP");
                 }
-            } else if (error.request) {
-                toast.error("Network error. Please check your connection.");
-            } else {
-                toast.error("Failed to send OTP: " + error.message);
-            }
-        })
+            })
+            .catch((error) => {
+                console.log("Forgot password OTP sending error:", error);
+                dispatch(setLoader(false));
+                if (error.response) {
+                    if (error.response.status === 404) {
+                        toast.error("Service temporarily unavailable. Please try email login.");
+                    } else {
+                        toast.error(error.response.data?.message || "Failed to send OTP");
+                    }
+                } else if (error.request) {
+                    toast.error("Network error. Please check your connection.");
+                } else {
+                    toast.error("Failed to send OTP: " + error.message);
+                }
+            })
     }
 
     // Resend OTP
@@ -395,41 +395,41 @@ const sendPhoneLoginOtp = () => {
         console.log("Resetting password with OTP:", otpInfo.otp);
 
         dispatch(setLoader(true));
-        axios.post(process.env.REACT_APP_BASE_URL + "resetPasswordWithOtp", 
-            { 
-                Contact: otpInfo.contact, 
+        axios.post(process.env.REACT_APP_BASE_URL + "resetPasswordWithOtp",
+            {
+                Contact: otpInfo.contact,
                 Otp: otpInfo.otp,
                 NewPassword: otpInfo.newPassword,
                 ConfirmPassword: otpInfo.confirmPassword
-            }, 
+            },
             postHeaderWithoutToken
         )
-        .then((res) => {
-            dispatch(setLoader(false));
-            if (res.data.status === 200) {
-                toast.success(res?.data?.message);
-                // Reset all states
-                resetOtpFlow();
-                console.log("Password reset successfully");
-                
-                // Redirect to login after successful password reset
-                setTimeout(() => {
-                    setForgotPasswordState(false);
-                    setSignInState(1);
-                }, 2000);
-            } else {
-                toast.error(res?.data?.message || "Password reset failed");
-            }
-        })
-        .catch((error) => {
-            console.log("Password reset error:", error);
-            dispatch(setLoader(false));
-            if (error.response && error.response.data) {
-                toast.error(error.response.data.message || "Password reset failed");
-            } else {
-                toast.error("Network error. Please try again.");
-            }
-        })
+            .then((res) => {
+                dispatch(setLoader(false));
+                if (res.data.status === 200) {
+                    toast.success(res?.data?.message);
+                    // Reset all states
+                    resetOtpFlow();
+                    console.log("Password reset successfully");
+
+                    // Redirect to login after successful password reset
+                    setTimeout(() => {
+                        setForgotPasswordState(false);
+                        setSignInState(1);
+                    }, 2000);
+                } else {
+                    toast.error(res?.data?.message || "Password reset failed");
+                }
+            })
+            .catch((error) => {
+                console.log("Password reset error:", error);
+                dispatch(setLoader(false));
+                if (error.response && error.response.data) {
+                    toast.error(error.response.data.message || "Password reset failed");
+                } else {
+                    toast.error("Network error. Please try again.");
+                }
+            })
     }
 
     const createUserTrackLog = (token) => {
@@ -543,7 +543,7 @@ const sendPhoneLoginOtp = () => {
                                     </li>
                                 </ul>
                                 <div className="tab-content">
-                                    
+
                                     {/* Phone Login Flow */}
                                     {phoneLoginState && (
                                         <div className="tab-pane fade show active">
@@ -601,7 +601,7 @@ const sendPhoneLoginOtp = () => {
                                                             autoComplete="one-time-code"
                                                         />
                                                     </div>
-                                                    
+
                                                     {/* OTP Timer Display */}
                                                     <div className="form-group text-center">
                                                         {otpTimer > 0 ? (
@@ -630,7 +630,7 @@ const sendPhoneLoginOtp = () => {
                                                             className="btn btn-link"
                                                             onClick={resendOtp}
                                                             disabled={!canResendOtp}
-                                                            style={{ 
+                                                            style={{
                                                                 opacity: canResendOtp ? 1 : 0.6,
                                                                 cursor: canResendOtp ? 'pointer' : 'not-allowed'
                                                             }}
@@ -757,7 +757,7 @@ const sendPhoneLoginOtp = () => {
                                                             className="btn btn-link"
                                                             onClick={resendOtp}
                                                             disabled={!canResendOtp}
-                                                            style={{ 
+                                                            style={{
                                                                 opacity: canResendOtp ? 1 : 0.6,
                                                                 cursor: canResendOtp ? 'pointer' : 'not-allowed'
                                                             }}
@@ -826,8 +826,8 @@ const sendPhoneLoginOtp = () => {
                                                             Remember Me
                                                         </label>
                                                     </div>
-                                                    <a 
-                                                        href="#" 
+                                                    <a
+                                                        href="#"
                                                         className="forgot-link"
                                                         onClick={(e) => {
                                                             e.preventDefault();
@@ -840,22 +840,10 @@ const sendPhoneLoginOtp = () => {
                                             </form>
                                             <div className="form-choice">
                                                 <p className="text-center">or sign in with</p>
-                                                <div className="row">
-                                                    <div className="col-sm-6">
-                                                        <a href="#" className="btn btn-login btn-g">
-                                                            <i className="icon-google" />
-                                                            Login With Google
-                                                        </a>
-                                                    </div>
-                                                    <div className="col-sm-6">
-                                                        <a href="#" className="btn btn-login btn-f">
-                                                            <i className="icon-facebook-f" />
-                                                            Login With Facebook
-                                                        </a>
-                                                    </div>
-                                                </div>
-                                                <div className="col-sm-6 ml-auto mr-auto mt-2 cursor-pointer">
-                                                    <a 
+
+                                                {/* Phone Login on Top */}
+                                                <div className="col-sm-6 ml-auto mr-auto mt-2 cursor-pointer text-center">
+                                                    <a
                                                         className="btn btn-login btn-f"
                                                         onClick={() => setPhoneLoginState(true)}
                                                     >
@@ -863,7 +851,24 @@ const sendPhoneLoginOtp = () => {
                                                         Login With Phone
                                                     </a>
                                                 </div>
+
+                                                {/* Facebook and Google Below */}
+                                                <div className="row mt-3">
+                                                    <div className="col-sm-6">
+                                                        <a href="#" className="btn btn-login btn-f">
+                                                            <i className="icon-facebook-f" />
+                                                            Login With Facebook
+                                                        </a>
+                                                    </div>
+                                                    <div className="col-sm-6">
+                                                        <a href="#" className="btn btn-login btn-g">
+                                                            <i className="icon-google" />
+                                                            Login With Google
+                                                        </a>
+                                                    </div>
+                                                </div>
                                             </div>
+
                                         </div>
                                     )}
 

@@ -15,6 +15,7 @@ import Blog from '../Views/Screens/Blog';
 import Error from '../Views/Screens/Error';
 import Login from '../Views/Screens/Login';
 import AddAddress from '../Views/Screens/AddAddress';
+import EditAddress from '../Views/Screens/AddAddress';
 import Checkout from '../Views/Screens/Checkout';
 import LegalPage from '../Views/Screens/LegalPage';
 
@@ -74,6 +75,14 @@ const router = createBrowserRouter([
             {
                 path: "/addAddress",
                 element: <BaseActivity><AddAddress /></BaseActivity>
+            },
+            {
+                path: "/editAddress",
+                element: (
+                    <BaseActivity>
+                        <EditAddress />
+                    </BaseActivity>
+                ),
             },
             {
                 path: "/checkout",
